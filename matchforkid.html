@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Fun for Kids</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex items-center justify-center h-screen bg-blue-100 text-gray-700">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('backdrop.webp'); z-index: -1;"></div>
+    
+    <!-- Main Content -->
+    <div class="text-center p-4 bg-white rounded-lg shadow-lg space-y-4 relative z-10">
+        <canvas id="mathCanvas" width="400" height="300" class="border-4 border-pink-400 bg-yellow-100 shadow-md rounded-lg mx-auto"></canvas>
+        
+        <div class="flex flex-col items-center space-y-2">
+            <button onclick="generateProblem()" class="px-4 py-2 bg-green-400 text-white font-semibold rounded-md hover:bg-green-500 transition">
+                Tạo bài toán mới
+            </button>
+            
+            <input type="number" id="answer" placeholder="Điền đáp án" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-300 w-1/2 text-center">
+            
+            <button onclick="checkAnswer()" class="px-4 py-2 bg-blue-400 text-white font-semibold rounded-md hover:bg-blue-500 transition">
+                Kiểm tra
+            </button>
+            
+            <p id="feedback" class="text-xl font-bold"></p>
+            <p id="timer" class="text-lg font-semibold text-red-500"></p> <!-- Hiển thị thời gian đếm ngược -->
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mathCanvas');
+        const ctx = canvas.getContext('2d');
+        let correctAnswer = 0;
+        let timerInterval; // Lưu trữ ID của bộ đếm thời gian
+        let timeLeft = 10; // Đặt thời gian trả lời (10 giây)
+
+        function getRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval); // Xóa bộ đếm thời gian trước đó (nếu có)
+            timeLeft = 10;
+            document.getElementById('timer').textContent = `Thời gian còn lại: ${timeLeft} giây`;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = `Thời gian còn lại: ${timeLeft} giây`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('feedback').textContent = 'Hết giờ! Chuyển sang bài toán mới...';
+                    document.getElementById('feedback').className = 'text-xl font-bold text-red-500';
+                    setTimeout(generateProblem, 1000); // Chuyển sang bài toán mới sau 1 giây
+                }
+            }, 1000);
+        }
+
+        function generateProblem() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const num1 = getRandomNumber(1, 10);
+            const num2 = getRandomNumber(1, 10);
+            const operators = ['+', '-'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+
+            if (operator === '+') {
+                correctAnswer = num1 + num2;
+            } else {
+                correctAnswer = num1 - num2;
+            }
+
+            // Vẽ bài toán lên canvas
+            ctx.font = '60px Pixelify Sans';
+            ctx.fillStyle = '#ff4500';
+            ctx.fillText(`${num1} ${operator} ${num2} = ?`, 80, 170);
+
+            // Đặt feedback trống và khởi động lại bộ đếm thời gian
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('answer').value = '';
+            startTimer(); // Bắt đầu đếm thời gian
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const feedback = document.getElementById('feedback');
+
+            clearInterval(timerInterval); // Dừng đếm thời gian nếu người dùng trả lời
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = 'Chính xác!';
+                feedback.className = 'text-xl font-bold text-green-500';
+                setTimeout(generateProblem, 1000); // Tự động chuyển bài toán sau khi trả lời đúng
+            } else {
+                feedback.textContent = 'Sai rồi! Thử lại nhé!';
+                feedback.className = 'text-xl font-bold text-red-500';
+            }
+        }
+
+        // Khởi tạo bài toán đầu tiên
+        generateProblem();
+    </script>
+</body>
+</html>
